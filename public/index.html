@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <button id="signIn">Sign in with Google</button>
+  <button id="signGithub">Sign in with Github</button>
+  <button id="signEmail">Sign in with Emaik</button>
+  <div id="show"></div>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, sendEmailVerification, GithubAuthProvider, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBpmprOdAag2720wXpyH9PJPBx4NPUQPWs",
+      authDomain: "trail-e29ed.firebaseapp.com",
+      projectId: "trail-e29ed",
+      storageBucket: "trail-e29ed.appspot.com",
+      messagingSenderId: "418341368541",
+      appId: "1:418341368541:web:58835ca6ecbec92a226134"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const provider2 = new GithubAuthProvider();
+
+    document.getElementById("signIn").addEventListener('click', () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user
+          console.log(user);
+          show.innerHTML = `
+      <h1>${user.displayName}</h1>
+      <h1>${user.email}</h1>
+      <img src=${user.photoUrl} width="100">
+      `
+
+          sendEmailVerification(auth.currentUser)
+            .then(() => {
+              console.log("Email sent");
+            })
+
+          if (result) {
+            window.location.href = "dashboard.html"
+          } else {
+            window.location.href = "index.html"
+          }
+
+        })
+
+        .catch((err) => {
+          console.log(err);
+
+        })
+
+    })
+
+    document.getElementById("signGithub").addEventListener('click', () => {
+      signInWithPopup(auth, provider2)
+        .then((result) => {
+          // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+          // const credential = GithubAuthProvider.credentialFromResult(result);
+          // const token = credential.accessToken;
+
+          // The signed-in user info.
+          const user = result.user;
+          // IdP data available using getAdditionalUserInfo(result)
+          // ...
+        }).catch((error) => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          // The email of the user's account used.
+          const email = error.customData.email;
+          // The AuthCredential type that was used.
+          const credential = GithubAuthProvider.credentialFromError(error);
+          // ...
+        });
+    })
+
+    // document.getElementById("signEmail").addEventListener('click', () => {
+    //   let email = "dgenafo@gmail.com"
+    //   createUserWithEmailAndPassword(auth, email, password)
+    //     .then((userCredential) => {
+    //       // Signed in
+    //       const user = userCredential.user;
+    //       console.log(user);
+    //       // ...
+    //     })
+    //     .catch((error) => {
+    //       const errorCode = error.code;
+    //       const errorMessage = error.message;
+    //       // ..
+    //     });
+    // })
+  </script>
+</body>
+
+</html>

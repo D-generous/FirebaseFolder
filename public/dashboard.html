@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script refer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="container-fluid col-7 mt-lg-5 shadow p-3">
+        <h3 class="text-center">Todo Application</h3>
+        <div class="form-outline my-2">
+            <input type="text" class="form-control" id="inp">
+            <label for="inp" class="form-label">Enter your todo</label>
+        </div>
+        <div class="form-group my-2">
+            <button class="w-100 btn btn-primary" onclick="checkMe()">Submit</button>
+        </div>
+    </div>
+    <div class="container-fluid col-5 my-3 shadow border border-success">
+        <!-- <div id="showTable"></div> -->
+    </div>
+
+
+    <div class="container-fluid">
+        <h1 class="text-center">Upload movies</h1>
+        <div class="my-3">
+            <input type="text" class="form-control" placeholder="Movie title" id="movTitle">
+        </div>
+        <div class="my-3">
+            <input type="text" class="form-control" placeholder="Movie genre" id="movGenre">
+        </div>
+        <div class="my-3">
+            <input type="file" class="form-control" placeholder="Upload your movie" id="movie">
+        </div>
+        <div id="showProgress"></div>
+        <div class="my-3">
+            <button onclick="submitMedia()" class="btn btn-dark">Submit Files</button>
+        </div>
+    </div>
+    <!-- <img src="https://firebasestorage.googleapis.com/v0/b/trail-e29ed.appspot.com/o/proj%203.jpeg?alt=media&token=4eb51448-f575-45a3-ad65-269c71fe152a" alt=""> -->
+    <!-- <h1>I am Dashboard</h1>
+    <div id="show"></div>
+    <div class="container-fluid col-7 mt-lg-5 shadow p-3">
+        <div class="form-outline my-2"></div>
+        <input type="text" id="inp" placeholder="Enter your Todo">
+        <button onclick="checkMe()">Add</button>
+    </div>
+    <div id="showTable"></div> -->
+    <!-- <button onclick="logOut()">Sign Out</button> -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+        import { getDatabase, ref, set, onValue} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+        import { getStorage, ref as stRef } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpmprOdAag2720wXpyH9PJPBx4NPUQPWs",
+            authDomain: "trail-e29ed.firebaseapp.com",
+            projectId: "trail-e29ed",
+            storageBucket: "trail-e29ed.appspot.com",
+            messagingSenderId: "418341368541",
+            appId: "1:418341368541:web:58835ca6ecbec92a226134",
+            databaseURL: "https://trail-e29ed-default-rtdb.firebaseio.com",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        //   const provider = new GoogleAuthProvider();
+        const storage = getStorage();
+        let todoIndex = 0
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const uid = user.uid;
+                console.log(user);
+                show.innerHTML = `
+                <div>${user.displayName}</div>
+                <div>${user.email}</div>
+                <img src="${user.photoUrl}" alt="profile picture">
+                `
+            } else {
+                console.log("user not found");
+                window.location.href="index.html"
+            }
+        });
+
+        // document.getElementById("check").addEventListener('click',()=>{
+        //     alert("sign out")
+        //     signOut(auth).then(() => {
+        //         console.log("Successfully singed out");
+        //     }).catch((error) => {
+        //         console.log(error);
+        //         window.location.href="index.html"
+        //     });
+
+        // })
+        // window.logOut = logOut
+
+        const checkMe =()=>{
+            let dbref = ref(database, `allTodos/${todoIndex}`)
+            let dates = new Date()
+            let todos ={
+                todoName: inp.value,
+                time: dates.toLocaleTimeString(),
+                date: dates.toLocaleDateString(),
+                userName: auth.currentUser.displayName
+            }
+            set(dbref,todos)
+            console.log(todos);
+
+        }
+
+        window.checkMe = checkMe
+
+
+        let newRef = ref(database, "allTodos")
+        onValue(newRef,(snapshot)=>{
+            const data = snapshot.val()
+            console.log(data);
+            if (data) {
+                showTable.innerHTML=""
+                todoIndex = data.length
+                data.map((info, index)=>{
+                    showTable.innerHTML+=`
+                    <div>${index}</div>
+                    <small>${info.date}</small>&nbsp,
+                    <small>${info.time}</small>
+                    <p>${info.todoName}</p>
+                    <p>${info.userName}</p>
+    
+                    `
+    
+                })
+
+                
+            }else{
+                todoIndex = 0
+            }
+        })
+
+
+
+        
+        const submitMedia = () => {
+            let movieObj ={
+                title: movTitle.value,
+                genre: movGenre.value,
+                movie: movie.file,
+            }
+            console.log(movieObj.movie[0]);
+        }
+        window.submitMedia = submitMedia
+        
+        
+    //     document.getElementById("signIn").addEventListener('click', () => {
+    //         signInWithPopup(auth, provider)
+    //             .then((result) => {
+    //                 const user = result.user
+    //                 console.log(user);
+    //                 show.innerHTML = `
+    //   <h1>${user.displayName}</h1>
+    //   <h1>${user.email}</h1>
+    //   <img src=${user.photoUrl} width="100">
+    //   `
+
+    //                 sendEmailVerification(auth.currentUser)
+    //                     .then(() => {
+    //                         console.log("Email sent");
+    //                     })
+
+    //                 if (result) {
+    //                     window.location.href = "dashboard.html"
+    //                 } else {
+    //                     window.location.href = "index.html"
+    //                 }
+
+    //             })
+
+    //             .catch((err) => {
+    //                 console.log(err);
+
+    //             })
+
+    //     })
+    </script>
+</body>
+
+</html>
